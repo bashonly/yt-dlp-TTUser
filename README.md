@@ -4,6 +4,10 @@ A [yt-dlp](https://github.com/yt-dlp/yt-dlp) extractor [plugin](https://github.c
 
 Based on [redraskal's TikTokUserIE fork](https://github.com/redraskal/yt-dlp/tree/fix/tiktok-user)
 
+ * Pass `--extractor-args "tiktok:sec_uid=ID"` to specify a secondary user id with the value of `ID`
+
+ * Pass `--extractor-args "tiktok:firefox_path=PATH"` to specify the `PATH` of the Playwright Firefox binary if needed
+
 ## Installation
 
 Requires yt-dlp `2023.02.17` or above.
