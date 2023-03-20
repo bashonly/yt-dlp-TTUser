@@ -29,7 +29,7 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
     _API_BASE_URL = 'https://us.tiktok.com/api/post/item_list/'
     _PARAMS = {
         'aid': '1988',
-        'app_language': 'en',  # url only?
+        'app_language': 'en',
         'app_name': 'tiktok_web',
         'browser_language': 'en-US',
         'browser_name': 'Mozilla',
@@ -40,36 +40,35 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
         'cookie_enabled': 'true',
         'device_id': ''.join(random.choices(string.digits, k=19)),
         'device_platform': 'web_pc',
-        'focus_state': 'false',
+        'focus_state': 'true',
         'from_page': 'user',
         'history_len': '2',
-        'is_encryption': '1',
         'is_fullscreen': 'false',
         'is_page_visible': 'true',
         'os': 'windows',
+        'priority_region': '',
+        'referer': '',
         'region': 'US',
         'screen_height': '1080',
         'screen_width': '1920',
-        'tz_name': 'UTC',  # x-tt-params only?
-        'webcast_language': 'en',  # x-tt-params only?
     }
     _PARAMS_AES_KEY = b'webapp1.0+202106'
 
     def _x_tt_params(self, sec_uid, cursor):
         query = self._PARAMS.copy()
-        # query.pop('app_language', None)
+        query.pop('app_language', None)
         query.update({
             'cursor': cursor,
             'language': 'en',
-            'priority_region': '',
-            'referer': '',
             'root_referer': 'undefined',
             'secUid': sec_uid,
+            'tz_name': 'UTC',
             'userId': 'undefined',
             'verifyFp': 'undefined',
+            'webcast_language': 'en',
         })
         return base64.b64encode(aes_cbc_encrypt_bytes(
-            urllib.parse.urlencode(dict(sorted(query.items()))),
+            f'{urllib.parse.urlencode(dict(sorted(query.items())))}&is_encryption=1',
             self._PARAMS_AES_KEY, self._PARAMS_AES_KEY)).decode()
 
     def _entries(self, sec_uid, user_name):
