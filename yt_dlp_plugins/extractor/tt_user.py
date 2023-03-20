@@ -82,8 +82,7 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
         cursor = '0'
 
         with sync_playwright() as p:
-            browser = p.firefox.launch(
-                args=['--mute-audio'], executablePath=self._configuration_arg('firefox_path', [None], ie_key=TikTokIE)[0])
+            browser = p.firefox.launch(args=['--mute-audio'])
             webpage = browser.new_page()
             webpage.goto('https://www.tiktok.com/', wait_until='load')
             webpage.wait_for_timeout(2000)
