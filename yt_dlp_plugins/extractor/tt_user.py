@@ -62,6 +62,7 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
         query = self._PARAMS.copy()
         query.pop('app_language', None)
         query.update({
+            'count': '30',
             'cursor': cursor,
             'language': 'en',
             'root_referer': 'undefined',
