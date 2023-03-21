@@ -19,11 +19,7 @@ See [yt-dlp installing plugins](https://github.com/yt-dlp/yt-dlp#installing-plug
 
 ## Requirements
 
-`pycryptodomex` is required. If you don't use your operating system's package manager to install Python packages, you can install it with pip:
-```
-python3 -m pip install pycryptodomex
-```
-The plugin also requires Playwright for Python to be installed with its Firefox binary:
+The plugin requires Playwright for Python to be installed with its Firefox binary:
 ```
 python3 -m pip install playwright
 playwright install --with-deps firefox

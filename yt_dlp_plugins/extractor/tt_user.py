@@ -4,6 +4,7 @@ import random
 import string
 import urllib.parse
 
+from yt_dlp.aes import aes_cbc_encrypt_bytes
 from yt_dlp.utils import (
     ExtractorError,
     traverse_obj,
@@ -54,11 +55,6 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
     _PARAMS_AES_KEY = b'webapp1.0+202106'
 
     def _x_tt_params(self, sec_uid, cursor):
-        try:
-            from Cryptodome.Cipher import AES
-            from Cryptodome.Util.Padding import pad
-        except ImportError:
-            raise ExtractorError('Cryptodome is not installed', expected=True)
         query = self._PARAMS.copy()
         query.pop('app_language', None)
         query.update({
@@ -72,9 +68,9 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
             'verifyFp': 'undefined',
             'webcast_language': 'en',
         })
-        params = f'{urllib.parse.urlencode(dict(sorted(query.items())))}&is_encryption=1'
-        cipher = AES.new(self._PARAMS_AES_KEY, AES.MODE_CBC, self._PARAMS_AES_KEY)
-        return base64.b64encode(cipher.encrypt(pad(params.encode(), AES.block_size))).decode()
+        return base64.b64encode(aes_cbc_encrypt_bytes(
+            f'{urllib.parse.urlencode(dict(sorted(query.items())))}&is_encryption=1',
+            self._PARAMS_AES_KEY, self._PARAMS_AES_KEY)).decode()
 
     def _entries(self, sec_uid, user_name):
         try:
