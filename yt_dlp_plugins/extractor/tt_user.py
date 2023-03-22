@@ -140,7 +140,7 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
 
     def _real_extract(self, url):
         user_name = self._match_id(url)
-        sec_uid = self._configuration_arg('sec_uid', [None], ie_key=TikTokIE)[0]
+        sec_uid = self._configuration_arg('sec_uid', [None], ie_key=TikTokIE, casesense=True)[0]
 
         if not sec_uid:
             for user_url, msg in (
