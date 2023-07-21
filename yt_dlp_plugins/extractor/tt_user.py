@@ -110,12 +110,6 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
                 break
             cursor = timestamp
 
-    def _parse_aweme_video_app(self, aweme_detail):
-        ret = super()._parse_aweme_video_app(aweme_detail)
-        if not ret.get('channel_id'):
-            ret['channel_id'] = traverse_obj(aweme_detail, ('author', 'sec_uid'))
-        return ret
-
     def _get_sec_uid(self, user_url, user_name, msg):
         webpage = self._download_webpage(
             user_url, user_name, fatal=False, headers={'User-Agent': 'Mozilla/5.0'},
@@ -145,14 +139,11 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
                 r'<script[^>]+\bid=[\'"]__FRONTITY_CONNECT_STATE__[\'"][^>]*>', webpage, 'data', user_name),
                 ('source', 'data', f'/embed/@{user_name}', {dict}))
 
-            info = {}
             for aweme_id in traverse_obj(data, ('videoList', ..., 'id')):
                 try:
-                    info = self._extract_aweme_app(aweme_id)
+                    sec_uid = self._extract_aweme_app(aweme_id).get('channel_id')
                 except ExtractorError:
                     continue
-
-                sec_uid = info.get('channel_id')
                 if sec_uid:
                     break
 
