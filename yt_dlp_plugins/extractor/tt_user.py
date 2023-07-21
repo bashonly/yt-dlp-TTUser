@@ -2,15 +2,11 @@ import base64
 import itertools
 import random
 import string
+import time
 import urllib.parse
 
 from yt_dlp.aes import aes_cbc_encrypt_bytes
-from yt_dlp.utils import (
-    ExtractorError,
-    traverse_obj,
-    try_call,
-    update_url_query,
-)
+from yt_dlp.utils import ExtractorError, int_or_none, traverse_obj, try_call
 from yt_dlp.extractor.tiktok import TikTokIE, TikTokUserIE
 
 
@@ -26,7 +22,8 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
         },
     }]
 
-    _API_BASE_URL = 'https://us.tiktok.com/api/post/item_list/'
+    _USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:115.0) Gecko/20100101 Firefox/115.0'
+    _API_BASE_URL = 'https://www.tiktok.com/api/creator/item_list/'
     _PARAMS = {
         'aid': '1988',
         'app_language': 'en',
@@ -56,77 +53,67 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
 
     def _x_tt_params(self, sec_uid, cursor):
         query = self._PARAMS.copy()
-        query.pop('app_language', None)
+        # query.pop('app_language', None)
         query.update({
-            'count': '30',
+            'count': '15',
             'cursor': cursor,
             'language': 'en',
-            'root_referer': 'undefined',
+            # 'root_referer': 'undefined',
             'secUid': sec_uid,
+            'type': '0',
             'tz_name': 'UTC',
-            'userId': 'undefined',
-            'verifyFp': 'undefined',
+            # 'userId': 'undefined',
+            'verifyFp': 'verify_%s' % ''.join(random.choices(string.hexdigits, k=7)),
             'webcast_language': 'en',
         })
-        return base64.b64encode(aes_cbc_encrypt_bytes(
-            f'{urllib.parse.urlencode(dict(sorted(query.items())))}&is_encryption=1',
-            self._PARAMS_AES_KEY, self._PARAMS_AES_KEY)).decode()
+        query = dict(sorted(query.items()))
+        return (base64.b64encode(aes_cbc_encrypt_bytes(
+            f'{urllib.parse.urlencode(query)}&is_encryption=1',
+            self._PARAMS_AES_KEY, self._PARAMS_AES_KEY)).decode(), query)
 
     def _entries(self, sec_uid, user_name):
-        try:
-            from playwright.sync_api import sync_playwright
-        except ImportError:
-            raise ExtractorError('Playwright is not installed', expected=True)
+        cursor = int(time.time() * 1E3)
+        for page in itertools.count(1):
+            _, query = self._x_tt_params(sec_uid, cursor)
+            response = self._download_json(
+                self._API_BASE_URL, user_name, f'Downloading page {page}',
+                query=query, headers={'User-Agent': self._USER_AGENT})
 
-        api_url = update_url_query(self._API_BASE_URL, self._PARAMS)
-        cursor = '0'
+            for video in traverse_obj(response, ('itemList', lambda _, v: v['id'])):
+                video_id = video['id']
 
-        with sync_playwright() as p:
-            browser = p.firefox.launch(args=['--mute-audio'])
-            webpage = browser.new_page()
-            webpage.goto('https://www.tiktok.com/', wait_until='load')
-            webpage.wait_for_timeout(2000)
+                if not self._configuration_arg('web_fallback', ie_key=TikTokIE):
+                    yield self.url_result(self._create_url(user_name, video_id), TikTokIE, video_id)
+                    continue
 
-            for page in itertools.count(1):
-                self.to_screen(f'Downloading page {page}')
-                res = webpage.evaluate(
-                    '([api_url, params]) => fetch(api_url, { headers: { "x-tt-params": params } }).then(res => res.json())',
-                    [api_url, self._x_tt_params(sec_uid, cursor)])
+                entry = {}
+                try:
+                    entry = self._extract_aweme_app(video_id)
+                except ExtractorError as e:
+                    self.report_warning(
+                        f'{e.orig_msg}. Failed to extract from feed; falling back to web API response')
+                    if traverse_obj(video, ('video', 'playAddr')):
+                        entry = self._parse_aweme_video_web(video, self._create_url(user_name, video_id))
+                if entry:
+                    yield {
+                        **entry,
+                        'extractor_key': TikTokIE.ie_key(),
+                        'extractor': 'TikTok',
+                        'webpage_url': self._create_url(user_name, video_id),
+                    }
+                else:
+                    self.report_warning(f'Unable to extract video {video_id}')
 
-                for video in traverse_obj(res, ('itemList', ..., {dict})):
-                    video_id = video.get('id')
-                    if video_id:
-                        yield self.url_result(self._create_url(user_name, video_id), TikTokIE, video_id)
-                        # entry = {}
-                        # try:
-                        #     entry = self._extract_aweme_app(video_id)
-                        # except ExtractorError:
-                        #     self.report_warning('Failed to extract from feed; falling back to web API response')
-                        #     aweme_detail = traverse_obj(
-                        #         res, ('itemList', lambda _, v: v['id'] == video_id, {dict}), get_all=False)
-                        #     if traverse_obj(aweme_detail, ('video', 'playAddr')):
-                        #         entry = self._parse_aweme_video_web(
-                        #             aweme_detail, self._create_url(user_name, video_id))
-                        #
-                        # if entry:
-                        #     yield {
-                        #         **entry,
-                        #         'extractor_key': TikTokIE.ie_key(),
-                        #         'extractor': 'TikTok',
-                        #         'webpage_url': self._create_url(user_name, video_id),
-                        #     }
-                        # else:
-                        #     self.report_warning(f'Unable to extract video {video_id}')
-
-                if not res.get('hasMore') or not res.get('cursor'):
-                    break
-                cursor = res['cursor']
-
-            browser.close()
+            timestamp = traverse_obj(
+                response, ('itemList', -1, 'createTime', {lambda x: x * 1E3}, {int_or_none}))
+            if timestamp is None or timestamp >= cursor:
+                break
+            cursor = timestamp
 
     def _parse_aweme_video_app(self, aweme_detail):
         ret = super()._parse_aweme_video_app(aweme_detail)
-        ret['channel_id'] = traverse_obj(aweme_detail, ('author', 'sec_uid'))
+        if not ret.get('channel_id'):
+            ret['channel_id'] = traverse_obj(aweme_detail, ('author', 'sec_uid'))
         return ret
 
     def _get_sec_uid(self, user_url, user_name, msg):
@@ -155,7 +142,7 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
             webpage = self._download_webpage(
                 f'https://www.tiktok.com/embed/@{user_name}', user_name, note='Downloading user embed page')
             data = traverse_obj(self._search_json(
-                r'(?s)<script[^>]+\bid=[\'"]__FRONTITY_CONNECT_STATE__[\'"][^>]*>', webpage, 'data', user_name),
+                r'<script[^>]+\bid=[\'"]__FRONTITY_CONNECT_STATE__[\'"][^>]*>', webpage, 'data', user_name),
                 ('source', 'data', f'/embed/@{user_name}', {dict}))
 
             info = {}
