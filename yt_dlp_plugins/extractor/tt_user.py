@@ -1,11 +1,8 @@
-import base64
 import itertools
 import random
 import string
 import time
-import urllib.parse
 
-from yt_dlp.aes import aes_cbc_encrypt_bytes
 from yt_dlp.utils import ExtractorError, int_or_none, traverse_obj, try_call
 from yt_dlp.extractor.tiktok import TikTokIE, TikTokUserIE
 
@@ -24,60 +21,48 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
 
     _USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:115.0) Gecko/20100101 Firefox/115.0'
     _API_BASE_URL = 'https://www.tiktok.com/api/creator/item_list/'
-    _PARAMS = {
-        'aid': '1988',
-        'app_language': 'en',
-        'app_name': 'tiktok_web',
-        'browser_language': 'en-US',
-        'browser_name': 'Mozilla',
-        'browser_online': 'true',
-        'browser_platform': 'Win32',
-        'browser_version': '5.0 (Windows)',
-        'channel': 'tiktok_web',
-        'cookie_enabled': 'true',
-        'device_id': ''.join(random.choices(string.digits, k=19)),
-        'device_platform': 'web_pc',
-        'focus_state': 'true',
-        'from_page': 'user',
-        'history_len': '2',
-        'is_fullscreen': 'false',
-        'is_page_visible': 'true',
-        'os': 'windows',
-        'priority_region': '',
-        'referer': '',
-        'region': 'US',
-        'screen_height': '1080',
-        'screen_width': '1920',
-    }
-    _PARAMS_AES_KEY = b'webapp1.0+202106'
 
-    def _x_tt_params(self, sec_uid, cursor):
-        query = self._PARAMS.copy()
-        # query.pop('app_language', None)
-        query.update({
+    def _build_web_query(self, sec_uid, cursor):
+        return {
+            'aid': '1988',
+            'app_language': 'en',
+            'app_name': 'tiktok_web',
+            'browser_language': 'en-US',
+            'browser_name': 'Mozilla',
+            'browser_online': 'true',
+            'browser_platform': 'Win32',
+            'browser_version': '5.0 (Windows)',
+            'channel': 'tiktok_web',
+            'cookie_enabled': 'true',
             'count': '15',
             'cursor': cursor,
+            'device_id': ''.join(random.choices(string.digits, k=19)),
+            'device_platform': 'web_pc',
+            'focus_state': 'true',
+            'from_page': 'user',
+            'history_len': '2',
+            'is_fullscreen': 'false',
+            'is_page_visible': 'true',
             'language': 'en',
-            # 'root_referer': 'undefined',
+            'os': 'windows',
+            'priority_region': '',
+            'referer': '',
+            'region': 'US',
+            'screen_height': '1080',
+            'screen_width': '1920',
             'secUid': sec_uid,
-            'type': '0',
+            'type': '1',  # pagination type: 0 == oldest-to-newest, 1 == newest-to-oldest
             'tz_name': 'UTC',
-            # 'userId': 'undefined',
             'verifyFp': 'verify_%s' % ''.join(random.choices(string.hexdigits, k=7)),
             'webcast_language': 'en',
-        })
-        query = dict(sorted(query.items()))
-        return (base64.b64encode(aes_cbc_encrypt_bytes(
-            f'{urllib.parse.urlencode(query)}&is_encryption=1',
-            self._PARAMS_AES_KEY, self._PARAMS_AES_KEY)).decode(), query)
+        }
 
     def _entries(self, sec_uid, user_name):
         cursor = int(time.time() * 1E3)
         for page in itertools.count(1):
-            _, query = self._x_tt_params(sec_uid, cursor)
             response = self._download_json(
                 self._API_BASE_URL, user_name, f'Downloading page {page}',
-                query=query, headers={'User-Agent': self._USER_AGENT})
+                query=self._build_web_query(sec_uid, cursor), headers={'User-Agent': self._USER_AGENT})
 
             for video in traverse_obj(response, ('itemList', lambda _, v: v['id'])):
                 video_id = video['id']
@@ -104,11 +89,10 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
                 else:
                     self.report_warning(f'Unable to extract video {video_id}')
 
-            timestamp = traverse_obj(
+            cursor = traverse_obj(
                 response, ('itemList', -1, 'createTime', {lambda x: x * 1E3}, {int_or_none}))
-            if timestamp is None or timestamp >= cursor:
+            if not cursor or not response.get('hasMorePrevious'):
                 break
-            cursor = timestamp
 
     def _get_sec_uid(self, user_url, user_name, msg):
         webpage = self._download_webpage(
