@@ -12,7 +12,7 @@ Requires yt-dlp `2023.02.17` or above.
 
 You can install this package with pip:
 ```
-python3 -m pip install -U https://github.com/bashonly/yt-dlp-TTUser/archive/creator.zip
+python3 -m pip install -U https://github.com/bashonly/yt-dlp-TTUser/archive/master.zip
 ```
 
 See [yt-dlp installing plugins](https://github.com/yt-dlp/yt-dlp#installing-plugins) for the many other ways this plugin package can be installed.
