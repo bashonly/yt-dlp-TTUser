@@ -78,7 +78,7 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
                     self.report_warning(
                         f'{e.orig_msg}. Failed to extract from feed; falling back to web API response')
                     if traverse_obj(video, ('video', 'playAddr')):
-                        entry = self._parse_aweme_video_web(video, self._create_url(user_name, video_id))
+                        entry = self._parse_aweme_video_web(video, self._create_url(user_name, video_id), video_id)
                 if entry:
                     yield {
                         **entry,
