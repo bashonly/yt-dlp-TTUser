@@ -129,7 +129,7 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
         if not sec_uid:
             webpage = self._download_webpage(
                 f'https://www.tiktok.com/embed/@{user_name}', user_name,
-                note='Downloading user embed page', fatal=False)
+                note='Downloading user embed page', fatal=False) or ''
             data = traverse_obj(self._search_json(
                 r'<script[^>]+\bid=[\'"]__FRONTITY_CONNECT_STATE__[\'"][^>]*>',
                 webpage, 'data', user_name, default={}),
