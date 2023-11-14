@@ -97,7 +97,7 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
     def _get_sec_uid(self, user_url, user_name, msg):
         webpage = self._download_webpage(
             user_url, user_name, fatal=False, headers={'User-Agent': 'Mozilla/5.0'},
-            note=f'Downloading {msg} webpage', errnote=f'Unable to download {msg} webpage')
+            note=f'Downloading {msg} webpage', errnote=f'Unable to download {msg} webpage') or ''
         sec_uid = traverse_obj(self._search_json(
             r'<script[^>]+\bid="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>', webpage,
             'rehydration data', user_name, end_pattern=r'</script>', default={}),
