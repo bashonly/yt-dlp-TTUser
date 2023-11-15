@@ -1,3 +1,9 @@
+from yt_dlp.update import version_tuple
+from yt_dlp.version import __version__
+
+if version_tuple(__version__) < (2023, 9, 24):
+    raise ImportError('yt-dlp version 2023.09.24 or later is required to use the TTUser plugin')
+
 import itertools
 import random
 import string

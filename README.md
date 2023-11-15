@@ -8,7 +8,7 @@ A [yt-dlp](https://github.com/yt-dlp/yt-dlp) extractor [plugin](https://github.c
 
 ## Installation
 
-Requires yt-dlp `2023.02.17` or above.
+Requires yt-dlp `2023.09.24` or above.
 
 You can install this package with pip:
 ```
