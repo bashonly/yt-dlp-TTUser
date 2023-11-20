@@ -95,9 +95,12 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
                 else:
                     self.report_warning(f'Unable to extract video {video_id}')
 
+            old_cursor = cursor
             cursor = traverse_obj(
                 response, ('itemList', -1, 'createTime', {lambda x: x * 1E3}, {int_or_none}))
-            if not cursor or not response.get('hasMorePrevious'):
+            if not cursor:
+                cursor = old_cursor - 604800000  # jump 1 week back in time
+            if cursor < 1472706000000 or not traverse_obj(response, 'hasMorePrevious'):
                 break
 
     def _get_sec_uid(self, user_url, user_name, msg):
