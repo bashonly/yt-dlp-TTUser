@@ -1,0 +1,57 @@
+name: Create release
+on: [push]
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set variables
+      id: set_variables
+      run: |
+        echo "::group::Variables"
+        cat << EOF | tee -a "$GITHUB_OUTPUT"
+        tag=$(git describe --tags --abbrev=0)
+        version=$(sed -n 's/^version\s*=\s*"\(.*\)"$/\1/p' pyproject.toml)
+        name=$(sed -n 's/^name\s*=\s*"\(.*\)"$/\1/p' pyproject.toml)
+        EOF
+        echo "::endgroup::"
+
+    - uses: actions/setup-python@v5
+      env:
+        tag: ${{ steps.set_variables.outputs.tag }}
+        version: ${{ steps.set_variables.outputs.version }}
+      if: |
+        env.tag != env.version
+      with:
+        python-version: "3.11"
+
+    - name: Install Requirements
+      env:
+        tag: ${{ steps.set_variables.outputs.tag }}
+        version: ${{ steps.set_variables.outputs.version }}
+      if: |
+        env.tag != env.version
+      run: |
+        python3 -m pip install -U build hatchling wheel
+
+    - name: Build and publish release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        tag: ${{ steps.set_variables.outputs.tag }}
+        version: ${{ steps.set_variables.outputs.version }}
+        name: ${{ steps.set_variables.outputs.name }}
+      if: |
+        env.tag != env.version
+      run: |
+        rm -rf dist/*
+        python3 -m build --no-isolation .
+        gh release create "${version}" \
+          --latest \
+          --title "${name} ${version}" \
+          dist/*.whl
