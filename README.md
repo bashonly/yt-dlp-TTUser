@@ -10,9 +10,11 @@ A [yt-dlp](https://github.com/yt-dlp/yt-dlp) extractor [plugin](https://github.c
 
 Requires yt-dlp `2023.09.24` or above.
 
-You can install this package with pip:
+You can download the wheel of the [latest release](https://github.com/bashonly/yt-dlp-TTUser/releases/latest) and place the `.whl` file in one of [yt-dlp's plugin paths](https://github.com/yt-dlp/yt-dlp#installing-plugins).
+
+Or you can install this package with pip:
 ```
 python3 -m pip install -U https://github.com/bashonly/yt-dlp-TTUser/archive/master.zip
 ```
 
-See [yt-dlp installing plugins](https://github.com/yt-dlp/yt-dlp#installing-plugins) for the many other ways this plugin package can be installed.
+See [the plugins section of the yt-dlp README](https://github.com/yt-dlp/yt-dlp#installing-plugins) for more information.
