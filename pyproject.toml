@@ -1,6 +1,15 @@
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.distutils.bdist_wheel]
-universal = true
+[project]
+name = "yt-dlp-TTUser"
+description = "A yt-dlp extractor plugin for downloading all videos posted by a TikTok user"
+authors = [{name = "bashonly", email = "bashonly@protonmail.com"}]
+version = "2024.02.10"
+requires-python = ">=3.8"
+readme = "README.md"
+license = {file = "LICENSE"}
+
+[tool.hatch.build.targets.wheel]
+packages = ["yt_dlp_plugins"]
