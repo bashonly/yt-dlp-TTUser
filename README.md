@@ -2,7 +2,7 @@ A [yt-dlp](https://github.com/yt-dlp/yt-dlp) extractor [plugin](https://github.c
 
 ---
 
- * Pass `--extractor-args "tiktok:sec_uid=ID"` to specify a secondary user id with the value of `ID`
+ * Pass `--extractor-args "tiktok:sec_uid=USERNAME1:SECUID1,USERNAME2:SECUID2"` to specify a secondary user ID (`SECUID`) for a given username (`USERNAME`)
 
 ## Installation
 

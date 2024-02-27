@@ -107,7 +107,18 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
 
     def _real_extract(self, url):
         user_name = self._match_id(url)
-        sec_uid = self._configuration_arg('sec_uid', [None], ie_key=TikTokIE, casesense=True)[0]
+
+        input_map = {
+            k: v for (k, _, v) in map(
+                lambda x: x.rpartition(':'),
+                self._configuration_arg('sec_uid', ie_key=TikTokIE, casesense=True))
+        }
+        sec_uid = input_map.get(user_name)
+        if not sec_uid and input_map.get(''):
+            self.report_warning(
+                '--extractor-args "tiktok:sec_uid=SECUID" has been deprecated. Use the new syntax: '
+                '--extractor-args "tiktok:sec_uid=USERNAME1:SECUID1,USERNAME2:SECUID2"')
+            sec_uid = input_map['']
 
         if not sec_uid:
             for user_url, msg in (
