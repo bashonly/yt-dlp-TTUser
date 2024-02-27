@@ -4,8 +4,6 @@ A [yt-dlp](https://github.com/yt-dlp/yt-dlp) extractor [plugin](https://github.c
 
  * Pass `--extractor-args "tiktok:sec_uid=ID"` to specify a secondary user id with the value of `ID`
 
- * Pass `--extractor-args "tiktok:web_fallback"` to extract videos from web API when unavailable from mobile feed (user extraction will take longer)
-
 ## Installation
 
 Requires yt-dlp `2023.09.24` or above.

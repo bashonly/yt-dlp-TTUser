@@ -9,7 +9,7 @@ import random
 import string
 import time
 
-from yt_dlp.utils import ExtractorError, int_or_none, traverse_obj
+from yt_dlp.utils import ExtractorError, int_or_none, traverse_obj, try_call
 from yt_dlp.extractor.tiktok import TikTokIE, TikTokUserIE
 
 
@@ -72,28 +72,11 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
 
             for video in traverse_obj(response, ('itemList', lambda _, v: v['id'])):
                 video_id = video['id']
-
-                if not self._configuration_arg('web_fallback', ie_key=TikTokIE):
-                    yield self.url_result(self._create_url(user_name, video_id), TikTokIE, video_id)
-                    continue
-
-                entry = {}
-                try:
-                    entry = self._extract_aweme_app(video_id)
-                except ExtractorError as e:
-                    self.report_warning(
-                        f'{e.orig_msg}. Failed to extract from feed; falling back to web API response')
-                    if traverse_obj(video, ('video', 'playAddr')):
-                        entry = self._parse_aweme_video_web(video, self._create_url(user_name, video_id), video_id)
-                if entry:
-                    yield {
-                        **entry,
-                        'extractor_key': TikTokIE.ie_key(),
-                        'extractor': 'TikTok',
-                        'webpage_url': self._create_url(user_name, video_id),
-                    }
-                else:
-                    self.report_warning(f'Unable to extract video {video_id}')
+                webpage_url = self._create_url(user_name, video_id)
+                info = try_call(
+                    lambda: self._parse_aweme_video_web(video, webpage_url, video_id)) or {'id': video_id}
+                info.pop('formats', None)
+                yield self.url_result(webpage_url, TikTokIE, **info)
 
             old_cursor = cursor
             cursor = traverse_obj(
