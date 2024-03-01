@@ -86,24 +86,24 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
             if cursor < 1472706000000 or not traverse_obj(response, 'hasMorePrevious'):
                 break
 
+    # For compat until required yt-dlp version is bumped
+    def _get_universal_data(self, webpage, display_id):
+        return traverse_obj(self._search_json(
+            r'<script[^>]+\bid="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>', webpage,
+            'universal data', display_id, end_pattern=r'</script>', default={}),
+            ('__DEFAULT_SCOPE__', {dict})) or {}
+
     def _get_sec_uid(self, user_url, user_name, msg):
         webpage = self._download_webpage(
             user_url, user_name, fatal=False, headers={'User-Agent': 'Mozilla/5.0'},
             note=f'Downloading {msg} webpage', errnote=f'Unable to download {msg} webpage') or ''
-        sec_uid = traverse_obj(self._search_json(
-            r'<script[^>]+\bid="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>', webpage,
-            'rehydration data', user_name, end_pattern=r'</script>', default={}),
-            ('__DEFAULT_SCOPE__', 'webapp.user-detail', 'userInfo', 'user', 'secUid', {str}))
-        if sec_uid:
-            return sec_uid
-        try:
-            return traverse_obj(
-                self._get_sigi_state(webpage, user_name),
-                ('LiveRoom', 'liveRoomUserInfo', 'user', 'secUid'),
-                ('UserModule', 'users', ..., 'secUid'),
-                get_all=False, expected_type=str)
-        except ExtractorError:
-            return None
+        return traverse_obj(
+            self._get_universal_data(webpage, user_name),
+            ('webapp.user-detail', 'userInfo', 'user', 'secUid', {str})) or traverse_obj(
+            try_call(lambda: self._get_sigi_state(webpage, user_name)),  # try_call is compat
+            ('LiveRoom', 'liveRoomUserInfo', 'user', 'secUid'),
+            ('UserModule', 'users', ..., 'secUid'),
+            get_all=False, expected_type=str)
 
     def _real_extract(self, url):
         user_name = self._match_id(url)
