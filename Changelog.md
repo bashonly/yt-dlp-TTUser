@@ -6,6 +6,12 @@
 - [Adjust for TikTokIE improvements](https://github.com/bashonly/yt-dlp-TTUser/commit/64e91ae105f2fd472cdac70eda94b460dc0b2d07) by [bashonly](https://github.com/bashonly)
 - [Update secuid error message for new syntax](https://github.com/bashonly/yt-dlp-TTUser/commit/94bdacb4afe16026b33b980703e6d5415a36e15a) by [bashonly](https://github.com/bashonly)
 
+#### Misc. changes
+- **build**
+    - [Automate release notes](https://github.com/bashonly/yt-dlp-TTUser/commit/f8e786c720c135d6618c792bab41c5e170d8b2a9) by [bashonly](https://github.com/bashonly)
+- **docs**
+    - [Add `Changelog.md`](https://github.com/bashonly/yt-dlp-TTUser/commit/aa32811e8248d7ec10e4ca2888da9f2923398b5b) by [bashonly](https://github.com/bashonly)
+
 ### 2024.02.27
 
 #### Plugin changes
