@@ -51,7 +51,9 @@ jobs:
       run: |
         rm -rf dist/*
         python3 -m build --no-isolation .
+        grep -Poz "(?s)### ${version//./\\.}\n\n\K.+?(?=(\n### ))" ./Changelog.md | head -n -1 > ./RELEASE_NOTES
         gh release create "${version}" \
           --latest \
           --title "${name} ${version}" \
+          --notes-file ./RELEASE_NOTES \
           dist/*.whl
