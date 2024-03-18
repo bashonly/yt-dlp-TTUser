@@ -9,8 +9,8 @@ import random
 import string
 import time
 
-from yt_dlp.utils import ExtractorError, int_or_none, traverse_obj, try_call
 from yt_dlp.extractor.tiktok import TikTokIE, TikTokUserIE
+from yt_dlp.utils import ExtractorError, int_or_none, traverse_obj, try_call
 
 
 class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
