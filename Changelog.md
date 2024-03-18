@@ -74,8 +74,6 @@
 #### Plugin changes
 - [Fix extractor-arg](https://github.com/bashonly/yt-dlp-TTUser/commit/ebc49edd0c49b0ff686e0b31c582c4014aa2a9a7) by [bashonly](https://github.com/bashonly)
 
-#### Plugin changes
-
 ### 2023.03.21
 
 #### Plugin changes
@@ -83,6 +81,8 @@
 - [Fix params encryption](https://github.com/bashonly/yt-dlp-TTUser/commit/f84576021f80885c9ddf57a486969bbfd2617b64) by [bashonly](https://github.com/bashonly)
 - [Fix query and params](https://github.com/bashonly/yt-dlp-TTUser/commit/a974eb2e14376b6d241187486d9cdda5cc58ec09) by [bashonly](https://github.com/bashonly)
 - [Remove Cryptodome dependency](https://github.com/bashonly/yt-dlp-TTUser/commit/7e94e3b25a71b1a8574f1043b8351e22afaafa9d) by [bashonly](https://github.com/bashonly)
+
+#### Misc. changes
 - **docs**
     - [Update README](https://github.com/bashonly/yt-dlp-TTUser/commit/b63ebf0dd3bfda8755500972c3ff6b4598b61482) by [bashonly](https://github.com/bashonly)
 
@@ -90,6 +90,8 @@
 
 #### Plugin changes
 - [Remove path arg](https://github.com/bashonly/yt-dlp-TTUser/commit/babe5ea2b1cecb715f4ed63f8321bdbff8ce3eed) by [bashonly](https://github.com/bashonly)
+
+#### Misc. changes
 - **docs**
     - [Update README](https://github.com/bashonly/yt-dlp-TTUser/commit/be99cce5a43ba8d9a17472790ff34a3bc4e995bd) by [bashonly](https://github.com/bashonly)
     - [Update README.md](https://github.com/bashonly/yt-dlp-TTUser/commit/a2cbc424e960f1591a7fcf46f16787c49d4f3975) by [bashonly](https://github.com/bashonly)
