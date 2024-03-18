@@ -149,7 +149,8 @@ class TikTokUser_TTUserIE(TikTokUserIE, plugin_name='TTUser'):
             if not sec_uid:
                 raise ExtractorError(
                     'Could not extract secondary user ID. '
-                    'Try using  --extractor-arg "tiktok:sec_uid=ID"  with your command, '
+                    'Try using  --extractor-args "tiktok:sec_uid=USERNAME:ID"  with your command, '
+                    'replacing "USERNAME" with the requested username and '
                     'replacing "ID" with the channel_id of the requested user')
 
         return self.playlist_result(self._entries(sec_uid, user_name), user_name)
