@@ -1,0 +1,18 @@
+name: Run tests
+on: [push, pull_request]
+
+jobs:
+  tests:
+    name: Lint / Format
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    - name: Install hatch
+      run: python3 -m pip install hatch
+    - name: Run lint
+      run: hatch run lint
+    - name: Run format
+      run: hatch run format
