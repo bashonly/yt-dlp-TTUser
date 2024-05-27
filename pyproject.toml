@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "yt-dlp-TTUser"
 description = "A yt-dlp extractor plugin for downloading all videos posted by a TikTok user"
 authors = [{name = "bashonly", email = "bashonly@protonmail.com"}]
-version = "2024.03.18"
+version = "2024.05.27"
 requires-python = ">=3.8"
 readme = "README.md"
 license = {file = "LICENSE"}
